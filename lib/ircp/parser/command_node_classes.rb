@@ -54,16 +54,11 @@ module Ircp
       def set(m)
         m.nickname = nickname.v.text_value
         flags.elements.each do |flag|
-          modes = flag.modes.elements.map { |e| e.text_value }
-          case flag.op.text_value
-          when '+'
-            m.plus_modes += modes
-          when '-'
-            m.minus_modes += modes
-          end
+          m.flags << Flag.new({
+            :operation => flag.op.text_value,
+            :modes => flag.modes.elements.map { |e| e.text_value }.uniq
+          })
         end
-        m.plus_modes.uniq!
-        m.minus_modes.uniq!
       end
     end
   end

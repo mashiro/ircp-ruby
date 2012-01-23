@@ -1,4 +1,5 @@
 require 'ircp/prefix'
+require 'ircp/flag'
 
 module Ircp
   class BaseMessage
@@ -43,17 +44,23 @@ module Ircp
 
   class BaseModeMessage < BaseMessage
     command :MODE
-    attr_accessor :plus_modes, :minus_modes
+    attr_accessor :target, :flags
 
     def initialize(options = {})
-      @plus_modes = []
-      @minus_modes = []
+      @flags = []
       super
     end
   end
 
   class UserModeMessage < BaseModeMessage
     command :MODE
-    attr_accessor :nickname
+    alias_method :nickname, :target
+    alias_method :nickname=, :target=
+  end
+
+  class ChannelModeMessage < BaseModeMessage
+    command :MODE
+    alias_method :channel, :target
+    alias_method :channel=, :target=
   end
 end

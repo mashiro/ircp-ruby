@@ -22,6 +22,7 @@ module Ircp
         'USER' user:( space v:user ) mode:( space v:[\d]+ ) unused:( space v:nospcrlfcl+ ) realname:( space ':' v:trailing ) <UserCommandNode> /
         'OPER' name:( space v:nospcrlfcl+ ) password:( space v:nospcrlfcl+ ) <OperCommandNode> /
         'MODE' nickname:( space v:nickname ) flags:( space op:( [+-] ) modes:( letter )* )* <UserModeCommandNode> /
+        #'MODE' channel:( space v:channel ) flags:( space op:( [+-] ) modes:( letter )* modeparams:( limit:( [\d]+ )? )* )* <ChannelModeCommandNode> /
         command params:params? <CommandWithParamsNode>
       end
 
