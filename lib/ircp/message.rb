@@ -8,13 +8,16 @@ module Ircp
     def initialize(options = {})
       @raw = options[:raw]
       @prefix = options[:prefix]
-      @prefix = Prefix.new(@prefix) if !@prefix.nil? && @prefix.is_a?(::Hash)
       @command = options[:command] || self.class.command
     end
 
     def self.command(command = nil)
       @command = command.to_s if command
       @command
+    end
+
+    def to_s
+      @raw
     end
   end
 
@@ -42,7 +45,7 @@ module Ircp
     attr_accessor :name, :password
   end
 
-  class BaseModeMessage < BaseMessage
+  class BaseModeMessage < BaseMessage # {{{
     command :MODE
     attr_accessor :target, :flags
 
@@ -50,7 +53,49 @@ module Ircp
       @flags = []
       super
     end
-  end
+
+    # RFC1459 like helpers {{{
+    def flag
+      @flags[0] ||= Flag.new
+    end
+
+    def flag=(value)
+      @flags[0] = value
+    end
+
+    def operator
+      flag.operator
+    end
+
+    def operator=(value)
+      flag.operator = value
+    end
+
+    def modes
+      flag.modes
+    end
+
+    def modes=(value)
+      flag.modes = value
+    end
+
+    def mode_param
+      flag.mode_params[0]
+    end
+
+    def mode_param=(value)
+      flag.mode_params[0] = value
+    end
+
+    def plus?
+      flag.plus?
+    end
+
+    def minus?
+      flag.minus?
+    end
+    # }}}
+  end # }}}
 
   class UserModeMessage < BaseModeMessage
     command :MODE

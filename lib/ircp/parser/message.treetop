@@ -12,17 +12,28 @@ module Ircp
       end
 
       rule prefix
-        servername &space <ShortPrefixNode> /
+        short_prefix / long_prefix
+      end
+
+      rule short_prefix
+        servername &space <ShortPrefixNode>
+      end
+
+      rule long_prefix
         nickname suffix:( user:( '!' user )? '@' host )? <LongPrefixNode>
+      end
+
+      rule ban_mask
+        letter* ( ( '!' letter* )? '@' letter* )?
       end
 
       rule command_with_params
         'PASS' password:( space v:nospcrlfcl+ ) <PasswordCommandNode> /
         'NICK' nickname:( space v:nickname ) <NicknameCommandNode> /
-        'USER' user:( space v:user ) mode:( space v:[\d]+ ) unused:( space v:nospcrlfcl+ ) realname:( space ':' v:trailing ) <UserCommandNode> /
+        'USER' user:( space v:user ) mode:( space v:digit+ ) unused:( space v:nospcrlfcl+ ) realname:( space ':' v:trailing ) <UserCommandNode> /
         'OPER' name:( space v:nospcrlfcl+ ) password:( space v:nospcrlfcl+ ) <OperCommandNode> /
-        'MODE' nickname:( space v:nickname ) flags:( space op:( [+-] ) modes:( letter )* )* <UserModeCommandNode> /
-        #'MODE' channel:( space v:channel ) flags:( space op:( [+-] ) modes:( letter )* modeparams:( limit:( [\d]+ )? )* )* <ChannelModeCommandNode> /
+        'MODE' target:( space v:channel ) flags:( space op:( [+-] ) modes:( letter )* modeparams:( space v:( digit+ / ban_mask ) )* )* <ChannelModeCommandNode> /
+        'MODE' target:( space v:nickname ) flags:( space op:( [+-] ) modes:( letter )* )* <UserModeCommandNode> /
         command params:params? <CommandWithParamsNode>
       end
 
@@ -75,7 +86,8 @@ module Ircp
       end
 
       rule channel
-        ( '#' / '+' / ( '!' channelid ) / '&' ) chanstring ( ':' chanstring )?
+        #( '#' / '+' / ( '!' channelid ) / '&' ) chanstring ( ':' chanstring )?
+        [&#+!] chanstring+
       end
 
       rule servername
@@ -92,8 +104,8 @@ module Ircp
       end
 
       rule shortname
-        #( ( letter / digit ) ( letter / digit / '-' )* ( letter / digit )* )
-        [^\x20!@]+
+        ( ( letter / digit ) ( letter / digit / '-' )* ( letter / digit )* )
+        #[^\x20!@]+
       end
 
       rule hostaddr
@@ -154,6 +166,35 @@ module Ircp
       rule special
         # "[", "]", "\", "`", "_", "^", "{", "|", "}"
         [\x5B-\x60\x7B-\x7D]
+      end
+
+
+      rule mask
+        ( nowild / noesc wildone / noesc wildmany )*
+      end
+
+      rule wildone
+        [\x3F]
+      end
+
+      rule wildmany
+        [\x2A]
+      end
+
+      rule nowild
+        [^\x00\x2A\x3F]
+      end
+
+      rule noesc
+        [^\x00\x5C]
+      end
+
+      rule matchone
+        [^\x00]
+      end
+
+      rule matchmany
+        matchone*
       end
     end
   end

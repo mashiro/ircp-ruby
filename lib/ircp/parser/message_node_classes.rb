@@ -8,19 +8,25 @@ module Ircp
       end
     end
 
-    class ShortPrefixNode < Treetop::Runtime::SyntaxNode
+    class PrefixNode < Treetop::Runtime::SyntaxNode
       def eval(env)
-        env[:raw] = text_value
-        servername.eval env
-        env
+        Prefix.new env
       end
     end
 
-    class LongPrefixNode < Treetop::Runtime::SyntaxNode
+    class ShortPrefixNode < PrefixNode
+      def eval(env)
+        env[:raw] = text_value
+        servername.eval env
+        super env
+      end
+    end
+
+    class LongPrefixNode < PrefixNode
       def eval(env)
         env[:raw] = text_value
         [nickname, user, host].compact.each { |rule| rule.eval env }
-        env
+        super env
       end
 
       def user

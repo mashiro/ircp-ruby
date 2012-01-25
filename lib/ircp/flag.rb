@@ -1,15 +1,19 @@
 module Ircp
   class Flag
-    attr_accessor :operation, :modes, :limit, :user, :ban_mask
-    alias_method :op, :operation
-    alias_method :op=, :operation=
+    attr_accessor :operator, :modes, :mode_params
 
     def initialize(options = {})
-      @operation = options[:operation]
+      @operator = options[:operator]
       @modes = options[:modes] || []
-      @limit = options[:limit]
-      @user = options[:user]
-      @ban_mask = options[:ban_mask]
+      @mode_params = options[:mode_params] || []
+    end
+
+    def plus?
+      @operator == '+'
+    end
+
+    def minus?
+      @operator == '-'
     end
   end
 end

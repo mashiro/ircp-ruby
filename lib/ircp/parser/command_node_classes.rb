@@ -52,11 +52,25 @@ module Ircp
     class UserModeCommandNode < BaseCommandNode
       message_class UserModeMessage
       def set(m)
-        m.nickname = nickname.v.text_value
+        m.target = target.v.text_value
         flags.elements.each do |flag|
           m.flags << Flag.new({
-            :operation => flag.op.text_value,
+            :operator => flag.op.text_value,
             :modes => flag.modes.elements.map { |e| e.text_value }.uniq
+          })
+        end
+      end
+    end
+
+    class ChannelModeCommandNode < BaseCommandNode
+      message_class ChannelModeMessage
+      def set(m)
+        m.target = target.v.text_value
+        flags.elements.each do |flag|
+          m.flags << Flag.new({
+            :operator => flag.op.text_value,
+            :modes => flag.modes.elements.map { |e| e.text_value }.uniq,
+            :mode_params => flag.modeparams.elements.map { |e| e.v.respond_to?(:eval) ? e.v.eval({}) : e.v.text_value }
           })
         end
       end
