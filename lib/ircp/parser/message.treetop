@@ -1,200 +1,73 @@
 # vim: ts=2 sw=2 et
 # -*- coding: ascii-8bit -*-
 require 'ircp/parser/message_node_classes'
-require 'ircp/parser/command_node_classes'
 
 module Ircp
   module Parser
-    # RFC2812 base
+    # RFC1459 based
     grammar Message
       rule message
-        prefix:( ':' prefix space )? command_with_params crlf? <MessageNode>
+        prefix:( ':' v:prefix space )? command params:params? crlf? <MessageNode>
       end
 
       rule prefix
-        short_prefix / long_prefix
-      end
-
-      rule short_prefix
-        servername &space <ShortPrefixNode>
-      end
-
-      rule long_prefix
-        nickname suffix:( user:( '!' user )? '@' host )? <LongPrefixNode>
-      end
-
-      rule ban_mask
-        letter* ( ( '!' letter* )? '@' letter* )?
-      end
-
-      rule command_with_params
-        'PASS' password:( space v:nospcrlfcl+ ) <PasswordCommandNode> /
-        'NICK' nickname:( space v:nickname ) <NicknameCommandNode> /
-        'USER' user:( space v:user ) mode:( space v:digit+ ) unused:( space v:nospcrlfcl+ ) realname:( space ':' v:trailing ) <UserCommandNode> /
-        'OPER' name:( space v:nospcrlfcl+ ) password:( space v:nospcrlfcl+ ) <OperCommandNode> /
-        'MODE' target:( space v:channel ) flags:( space op:( [+-] ) modes:( letter )* modeparams:( space v:( digit+ / ban_mask ) )* )* <ChannelModeCommandNode> /
-        'MODE' target:( space v:nickname ) flags:( space op:( [+-] ) modes:( letter )* )* <UserModeCommandNode> /
-        command params:params? <CommandWithParamsNode>
+        '' servername &space <ShortPrefixNode> /
+        nick user:( '!' v:user )? host:( '@' v:host )? <LongPrefixNode>
       end
 
       rule command
         letter+ <CommandNode> /
-        digit 3..3 <NumericReplyNode>
+        number 3..3 <NumericReplyNode>
       end
 
       rule params
-        heads:( space middle ) ..14 tail:( space ':' trailing )? <ParamsNode> /
-        heads:( space middle ) 14..14 tail:( space ( ':' )? trailing )? <ParamsNode>
-      end
-
-      rule nospcrlfcl
-        # any octet except NUL, CR, LF, " " and ":"
-        [^\x00\x0D\x0A\x20\x3A]
+        middles:( space v:middle )* trailing:( space ':' v:trailing )? <ParamsNode>
       end
 
       rule middle
-        nospcrlfcl ( ':' / nospcrlfcl )*
+        [^ :] [^ ]*
       end
 
       rule trailing
-        ( ':' / ' ' / nospcrlfcl )*
+        .*
       end
 
+
       rule space
-        [\x20]+
+        [ ]+
+      end
+
+      rule nospace
+        [^ ]
       end
 
       rule crlf
         [\x0D\x0A]
       end
 
-
-      rule target
-        nickname / server
-      end
-
-      rule msgtarget
-        msgto ( ',' msgto )*
-      end
-
-      rule msgto
-        channel /
-        ( user ( '%' host )? '@' servername ) /
-        ( user '%' host ) / targetmask /
-        nickname /
-        ( nickname '!' user '@' host )
-      end
-
-      rule channel
-        #( '#' / '+' / ( '!' channelid ) / '&' ) chanstring ( ':' chanstring )?
-        [&#+!] chanstring+
-      end
-
-      rule servername
-        '' hostname <ServerNameNode>
-      end
-
-      rule host
-        '' host:hostaddr <HostNode> /
-        '' host:hostname <HostNode>
-      end
-
-      rule hostname
-        shortname ( '.' shortname )* <HostNameNode>
-      end
-
-      rule shortname
-        ( ( letter / digit ) ( letter / digit / '-' )* ( letter / digit )* )
-        #[^\x20!@]+
-      end
-
-      rule hostaddr
-        '' hostaddr:ip4addr <HostAddrNode> /
-        '' hostaddr:ip6addr <HostAddrNode>
-      end
-
-      rule ip4addr
-        ( digit 1..3 '.' ) 3..3 digit 1..3 <IP4AddrNode>
-      end
-
-      rule ip6addr
-        hexdigit+ ( ':' hexdigist+ ) 7..7 <IP6AddrNode> /
-        '0:0:0:0:0:' ( '0' / 'FFFF' ) ':' ip4addr <IP6AddrNode>
-      end
-
-      rule nickname
-        #( letter / special ) ( letter / digit / special / '-' )*
-        [^\x20!@]+ <NickNameNode>
-      end
-
-      rule targetmask
-        ( '$' / '#' ) mask
-      end
-
-      rule chanstring
-        # any octet except NUL, BELL, CR, LF, " ", "," and ":"
-        [^\x00\x07\x0A\x0D\x20\x2C\x3A]
-      end
-
-      rule channelid
-        ( [A-Z] / digit ) 5..5
-      end
-
-      rule user
-        # any octet except NUL, CR, LF, " " and "@"
-        [^\x00\x0A\x0D\x20\x40]+ <UserNode>
-      end
-
-      rule key
-        # any 7-bit US_ASCII character,
-        # except NUL, CR, LF, FF, h/v TABs, and " "
-        [\x01-\x05\x07-\x08\x0C\x0E-\x1F\x21-\x7F] 1..23
-      end
-
       rule letter
-        [A-Za-z]
+        [a-zA-Z]
       end
 
-      rule digit
+      rule number
         [0-9]
       end
 
-      rule hexdigit
-        digit / [A-Fa-f]
+
+      rule servername
+        '' host <ServerNameNode>
       end
 
-      rule special
-        # "[", "]", "\", "`", "_", "^", "{", "|", "}"
-        [\x5B-\x60\x7B-\x7D]
+      rule host
+        [^ !@]+ <HostNode>
       end
 
-
-      rule mask
-        ( nowild / noesc wildone / noesc wildmany )*
+      rule nick
+        [^ !@]+ <NickNode>
       end
 
-      rule wildone
-        [\x3F]
-      end
-
-      rule wildmany
-        [\x2A]
-      end
-
-      rule nowild
-        [^\x00\x2A\x3F]
-      end
-
-      rule noesc
-        [^\x00\x5C]
-      end
-
-      rule matchone
-        [^\x00]
-      end
-
-      rule matchmany
-        matchone*
+      rule user
+        [^ !@]+ <UserNode>
       end
     end
   end

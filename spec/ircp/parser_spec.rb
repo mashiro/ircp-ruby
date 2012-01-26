@@ -6,139 +6,66 @@ shared_context 'parse text' do |text|
   let(:result) { @result }
 end
 
-shared_examples_for 'a message' do
-  let(:message_class) { example.metadata[:message_class] }
-  it { should be_an_instance_of message_class }
-  its(:command) { should eq message_class.command }
+shared_examples_for 'prefix for' do |options|
+  subject { result.prefix }
+  if options.nil?
+    it { should be_nil }
+  else
+    options.each do |key, value|
+      its(key) { should eq value }
+    end
+  end
+end
+
+shared_examples_for 'params for' do |*args|
+  subject { result.params }
+  args.each.with_index do |arg, index|
+    its([index]) { should eq arg }
+  end
 end
 
 describe Ircp::Parser do
   describe '#parse' do
-    describe 'Password message', :message_class => Ircp::PassMessage do
-      context 'PASS secretpasswordhere' do
-        include_context 'parse text', description
-        it_should_behave_like 'a message'
-
-        its(:password) { should eq 'secretpasswordhere' }
-      end
+    context 'PASS secretpasswordhere' do
+      include_context 'parse text', description
+      its(:command) { should eq 'PASS' }
+      it_should_behave_like 'prefix for', nil
+      it_should_behave_like 'params for', 'secretpasswordhere'
     end
 
-    describe 'Nick message', :message_class => Ircp::NickMessage do
-      context 'NICK Wiz' do
-        include_context 'parse text', description
-        it_should_behave_like 'a message'
-
-        its(:nickname) { should eq 'Wiz' }
-      end
-
-      context ':WiZ!jto@tolsun.oulu.fi NICK Kilroy' do
-        include_context 'parse text', description
-        it_should_behave_like 'a message'
-
-        its(:nickname) { should eq 'Kilroy' }
-        its(:'prefix.raw') { 'WiZ!jto@tolsun.oulu.fi' }
-        its(:'prefix.nickname') { should eq 'WiZ' }
-        its(:'prefix.user') { should eq 'jto' }
-        its(:'prefix.host') { should eq 'tolsun.oulu.fi' }
-      end
+    context ':testnick USER guest tolmoon tolsun :Ronnie Reagan' do
+      include_context 'parse text', description
+      its(:command) { should eq 'USER' }
+      it_should_behave_like 'prefix for', :servername => 'testnick'
+      it_should_behave_like 'params for', 'guest', 'tolmoon', 'tolsun', 'Ronnie Reagan'
     end
 
-    describe 'User message', :message_class => Ircp::UserMessage do
-      context 'USER guest 0 * :Ronnie Reagan' do
-        include_context 'parse text', description
-        it_should_behave_like 'a message'
-
-        its(:user) { should eq 'guest' }
-        its(:mode) { should eq 0 }
-        its(:unused) { should eq '*' }
-        its(:realname) { should eq 'Ronnie Reagan' }
-      end
+    context 'JOIN #foo,#bar fubar,foobar' do
+      include_context 'parse text', description
+      its(:command) { should eq 'JOIN' }
+      it_should_behave_like 'prefix for', nil
+      it_should_behave_like 'params for', '#foo,#bar', 'fubar,foobar'
     end
 
-    describe 'Oper message', :message_class => Ircp::OperMessage do
-      context 'OPER foo bar' do
-        include_context 'parse text', description
-        it_should_behave_like 'a message'
-
-        its(:name) { should eq 'foo' }
-        its(:password) { should eq 'bar' }
-      end
+    context 'MODE &oulu +b *!*@*.edu' do
+      include_context 'parse text', description
+      its(:command) { should eq 'MODE' }
+      it_should_behave_like 'prefix for', nil
+      it_should_behave_like 'params for', '&oulu', '+b', '*!*@*.edu'
     end
 
-    describe 'User mode message', :message_class => Ircp::UserModeMessage do
-      context 'MODE WiZ -w +i' do
-        include_context 'parse text', description
-        it_should_behave_like 'a message'
-
-        context 'RFC1459' do
-          it { should_not be_plus }
-          it { should be_minus }
-          its(:target) { should eq 'WiZ' }
-          its(:nickname) { should eq 'WiZ' }
-          its(:operator) { should eq '-' }
-          its(:modes) { should eq %w|w| }
-        end
-
-        context 'RFC2812' do
-          context 'First' do
-            subject { result.flags[0] }
-
-            it { should_not be_plus }
-            it { should be_minus }
-            its(:operator) { should eq '-' }
-            its(:modes) { should eq %w|w| }
-          end
-
-          context 'Second' do
-            subject { result.flags[1] }
-
-            it { should be_plus }
-            it { should_not be_minus }
-            its(:operator) { should eq '+' }
-            its(:modes) { should eq %w|i| }
-          end
-        end
-      end
+    context ':Angel PRIVMSG Wiz :Hello are you receiving this message ?' do
+      include_context 'parse text', description
+      its(:command) { should eq 'PRIVMSG' }
+      it_should_behave_like 'prefix for', :servername => 'Angel'
+      it_should_behave_like 'params for', 'Wiz', 'Hello are you receiving this message ?'
     end
 
-    describe 'Channel mode message', :message_class => Ircp::ChannelModeMessage do
-      context 'MODE #Finnish +o Kilroy' do
-        include_context 'parse text', description
-        it_should_behave_like 'a message'
-
-        it { should be_plus }
-        it { should_not be_minus }
-        its(:target) { should eq '#Finnish' }
-        its(:channel) { should eq '#Finnish' }
-        its(:operator) { should eq '+' }
-        its(:modes) { should eq %w|o| }
-      end
-
-      #context 'MODE &oulu +b *!*@*.edu +e *!*@*.bu.edu' do
-      #  include_context 'parse text', description
-      #  it_should_behave_like 'a message'
-
-      #  its(:target) { should eq '&oulu' }
-      #  its(:channel) { should eq '&oulu' }
-
-      #  context 'First' do
-      #    subject { result.flags[0] }
-
-      #    it { should be_plus }
-      #    it { should_not be_minus }
-      #    its(:operator) { should eq '+' }
-      #    its(:modes) { should eq %w|b| }
-      #  end
-
-      #  context 'Second' do
-      #    subject { result.flags[1] }
-
-      #    it { should be_plus }
-      #    it { should_not be_minus }
-      #    its(:operator) { should eq '+' }
-      #    its(:modes) { should eq %w|e| }
-      #  end
-      #end
+    context 'PRIVMSG #*.edu :NSFNet is undergoing work, expect interruptions' do
+      include_context 'parse text', description
+      its(:command) { should eq 'PRIVMSG' }
+      it_should_behave_like 'prefix for', nil
+      it_should_behave_like 'params for', '#*.edu', 'NSFNet is undergoing work, expect interruptions'
     end
   end
 end

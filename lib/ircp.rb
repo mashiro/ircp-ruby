@@ -13,6 +13,9 @@ module Ircp
   def self.parse(text)
     node = message_parser.parse(text)
     raise ParseError.new(message_parser.failure_reason) if node.nil?
-    node.eval
+
+    env = node.eval
+    params = env.delete(:params)
+    Message.new *params, env
   end
 end
