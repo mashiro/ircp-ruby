@@ -21,16 +21,18 @@ module Ircp
     end
 
     def to_s
-      return @raw unless @raw.nil?
-
-      if @servername
-        ":#{servername}"
+      if @raw.nil? || @raw.empty?
+        if @servername
+          ":#{servername}"
+        else
+          tokens = []
+          tokens << ":#{@nick}" unless @nick.nil?
+          tokens << "!#{@user}" unless @user.nil?
+          tokens << "@#{@host}" unless @host.nil?
+          tokens.join ''
+        end
       else
-        tokens = []
-        tokens.push ":#{@nick}" unless @nick.nil?
-        tokens.push "!#{@user}" unless @user.nil?
-        tokens.push "@#{@host}" unless @host.nil?
-        tokens.join ''
+        @raw.to_s
       end
     end
   end

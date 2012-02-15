@@ -19,13 +19,18 @@ module Ircp
     end
 
     def to_s
-      return @raw unless @raw.nil?
+      if @raw.nil? || @raw.empty?
+        tokens = []
+        tokens << @prefix
+        tokens << @command
+        @params.each { |param| tokens << param }
+        msg = tokens.delete_if { |token| token.nil? || token.empty? }.join(' ')
+      else
+        msg = @raw.to_s
+      end
 
-      tokens = []
-      tokens.push @prefix unless @prefix.empty?
-      tokens.push @command unless @command.nil?
-      tokens.push *@params
-      tokens.join ' '
+      msg << "\r\n" unless msg.end_with?("\r\n")
+      msg
     end
   end
 end
