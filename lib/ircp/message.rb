@@ -7,7 +7,7 @@ module Ircp
     def initialize(*args)
       options = args.last.is_a?(Hash) ? args.pop : {}
       @raw = options[:raw]
-      @prefix = Prefix.new(options[:prefix] || {})
+      @prefix = options[:prefix] ? Prefix.new(options[:prefix]) : nil
       @command = options[:command]
       @params = args
     end
