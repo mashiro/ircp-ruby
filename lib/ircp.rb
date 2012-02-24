@@ -3,8 +3,8 @@ require 'ircp/parser'
 require 'ircp/message'
 
 module Ircp
-  class ParseError < StandardError
-  end
+  class IrcpError < RuntimeError; end
+  class ParseError < IrcpError; end
 
   def self.message_parser
     @message_parser ||= Ircp::Parser::MessageParser.new
