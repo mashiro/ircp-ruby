@@ -1,6 +1,6 @@
 # Ircp
 
-Ircp is a IRC parser for ruby.
+Ircp is a IRC minimal parser for ruby.
 
 ## Installation
 

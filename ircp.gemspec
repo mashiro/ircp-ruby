@@ -4,9 +4,9 @@ require File.expand_path('../lib/ircp/version', __FILE__)
 Gem::Specification.new do |gem|
   gem.authors       = ["mashiro"]
   gem.email         = ["mail@mashiro.org"]
-  gem.description   = %q{irc parser}
-  gem.summary       = %q{irc parser for ruby}
-  gem.homepage      = ""
+  gem.description   = %q{IRC minimal parser}
+  gem.summary       = %q{IRC minimal parser for ruby}
+  gem.homepage      = "https://github.com/mashiro/ircp-ruby"
 
   gem.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   gem.files         = `git ls-files`.split("\n")
