@@ -20,7 +20,14 @@ Or install it yourself as:
 
 ```ruby
 require 'ircp'
-msg = Ircp.parse 'PRIVMSG ircp :hello ircp!'
+msg = Ircp.parse ':Angel!wings@irc.org PRIVMSG Wiz :Are you receiving this message ?'
+
+puts msg.prefix.nick # => 'Angel'
+puts msg.prefix.user # => 'wings'
+puts msg.prefix.host # => 'irc.org'
+puts msg.command     # => 'PRIVMSG'
+puts msg.params[0]   # => 'Wiz'
+puts msg.params[1]   # => 'Are you receiving this message ?'
 ```
 
 ## Contributing
