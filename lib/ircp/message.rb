@@ -9,7 +9,7 @@ module Ircp
       @raw = options[:raw]
       @prefix = options[:prefix] ? Prefix.new(options[:prefix]) : nil
       @command = options[:command]
-      @params = args
+      @params = args + Array(options[:params])
     end
 
     def inspect
