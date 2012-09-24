@@ -18,7 +18,7 @@ module Ircp
       "<#{variables.join ' '}>"
     end
 
-    def to_s
+    def to_irc
       if @raw.nil? || @raw.empty?
         tokens = []
         tokens << @prefix
@@ -32,5 +32,6 @@ module Ircp
       msg << "\r\n" unless msg.end_with?("\r\n")
       msg
     end
+    alias_method :to_s, :to_irc
   end
 end

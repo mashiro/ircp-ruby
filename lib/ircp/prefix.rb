@@ -20,7 +20,7 @@ module Ircp
       "<#{variables.join ' '}>"
     end
 
-    def to_s
+    def to_irc
       if @raw.nil? || @raw.empty?
         if @servername
           ":#{servername}"
@@ -35,5 +35,6 @@ module Ircp
         @raw.to_s
       end
     end
+    alias_method :to_s, :to_irc
   end
 end
