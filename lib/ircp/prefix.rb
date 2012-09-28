@@ -21,18 +21,12 @@ module Ircp
     end
 
     def to_irc
-      if @raw.nil? || @raw.empty?
-        if @servername
-          ":#{servername}"
-        else
-          tokens = []
-          tokens << ":#{@nick}" unless @nick.nil?
-          tokens << "!#{@user}" unless @user.nil?
-          tokens << "@#{@host}" unless @host.nil?
-          tokens.join ''
-        end
+      if @servername
+        ":#{servername}"
       else
-        @raw.to_s
+        [[':', @nick], ['!', @user], ['@', @host]].map do |mark, value|
+          "#{mark}#{value}" unless value.to_s.empty?
+        end.compact.join('')
       end
     end
     alias_method :to_s, :to_irc

@@ -19,16 +19,7 @@ module Ircp
     end
 
     def to_irc
-      if @raw.nil? || @raw.empty?
-        tokens = []
-        tokens << @prefix
-        tokens << @command
-        @params.each { |param| tokens << param }
-        msg = tokens.delete_if { |token| token.nil? || token.empty? }.join(' ')
-      else
-        msg = @raw.to_s
-      end
-
+      msg = [@prefix, @command, *@params].map { |v| v.to_s }.reject { |v| v.empty? }.join(' ')
       msg << "\r\n" unless msg.end_with?("\r\n")
       msg
     end
