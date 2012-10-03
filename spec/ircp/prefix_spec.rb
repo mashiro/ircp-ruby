@@ -21,13 +21,13 @@ describe Ircp::Prefix do
     context 'with servername' do
       before { @prefix = Ircp::Prefix.new(:servername => 'example.com') }
       subject { @prefix }
-      its(:to_s) { should eq ':example.com' }
+      its(:to_s) { should eq 'example.com' }
     end
 
     context 'with nick, user and host' do
       before { @prefix = Ircp::Prefix.new(:nick => 'foo', :user => 'bar', :host => 'example.com') }
       subject { @prefix }
-      its(:to_s) { should eq ':foo!bar@example.com' }
+      its(:to_s) { should eq 'foo!bar@example.com' }
     end
   end
 end

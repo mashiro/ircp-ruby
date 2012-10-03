@@ -25,7 +25,24 @@ describe Ircp::Message do
   end
 
   describe '#to_s' do
-    include_context 'initialize message', :command => 'TEST', :params => ['foo', 'bar', 'buzz']
-    its(:to_s) { should eq "TEST foo bar buzz\r\n" }
+    context ":command => 'test', :params => ['foo', 'bar', 'buzz']" do
+      include_context 'initialize message', :command => 'TEST', :params => ['foo', 'bar', 'buzz']
+      it { subject.to_s.should eq "TEST foo bar buzz\r\n" }
+    end
+
+    context ":command => 'TEST', :params => ['foo', 'bar buzz']" do
+      include_context 'initialize message', :command => 'TEST', :params => ['foo', 'bar buzz']
+      it { subject.to_s.should eq "TEST foo :bar buzz\r\n" }
+    end
+
+    context ":prefix => {:servername => 'example.com'}, :command => 'TEST', :params => ['foo', 'bar buzz']" do
+      include_context 'initialize message', :prefix => {:servername => 'example.com'}, :command => 'TEST', :params => ['foo', 'bar buzz']
+      it { subject.to_s.should eq ":example.com TEST foo :bar buzz\r\n" }
+    end
+
+    context ":prefix => {:servername => 'example.com'}, :command => 'TEST', :params => ['foo', ':bar buzz']" do
+      include_context 'initialize message', :prefix => {:servername => 'example.com'}, :command => 'TEST', :params => ['foo', ':bar buzz']
+      it { subject.to_s.should eq ":example.com TEST foo :bar buzz\r\n" }
+    end
   end
 end

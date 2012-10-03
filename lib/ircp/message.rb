@@ -2,6 +2,8 @@ require 'ircp/prefix'
 
 module Ircp
   class Message
+    CRLF = "\r\n"
+
     attr_accessor :raw, :prefix, :command, :params
 
     def initialize(*args)
@@ -13,14 +15,27 @@ module Ircp
     end
 
     def inspect
-      variables = instance_variables.map { |name| "#{name.inspect}=#{instance_variable_get(name).inspect}" }
+      variables = instance_variables.map { |name| "#{name}=#{instance_variable_get(name).inspect}" }
       variables.unshift "#{self.class}"
       "<#{variables.join ' '}>"
     end
 
     def to_irc
-      msg = [@prefix, @command, *@params].map { |v| v.to_s }.reject { |v| v.empty? }.join(' ')
-      msg << "\r\n" unless msg.end_with?("\r\n")
+      command = @command.to_s.upcase
+
+      tokens = []
+      tokens << ":#{@prefix}" if @prefix
+      tokens << command
+
+      unless @params.empty?
+        last = @params.pop.to_s
+        last.insert 0, ':' if !last.start_with?(':') && last.include?(' ')
+        @params << last
+      end
+      tokens += @params
+
+      msg = tokens.map { |token| token.to_s } .reject { |token| token.empty? }.join(' ')
+      msg << CRLF unless msg.end_with?(CRLF)
       msg
     end
     alias_method :to_s, :to_irc

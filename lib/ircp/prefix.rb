@@ -15,16 +15,16 @@ module Ircp
     end
 
     def inspect
-      variables = instance_variables.map { |name| "#{name.inspect}=#{instance_variable_get(name).inspect}" }
+      variables = instance_variables.map { |name| "#{name}=#{instance_variable_get(name).inspect}" }
       variables.unshift "#{self.class}"
       "<#{variables.join ' '}>"
     end
 
     def to_irc
       if @servername
-        ":#{servername}"
+        "#{servername}"
       else
-        [[':', @nick], ['!', @user], ['@', @host]].map do |mark, value|
+        [['', @nick], ['!', @user], ['@', @host]].map do |mark, value|
           "#{mark}#{value}" unless value.to_s.empty?
         end.compact.join('')
       end
