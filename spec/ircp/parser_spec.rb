@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Ircp::Parser do
   describe '#parse' do
-    context 'PASS secretpasswordhere' do
+    context "PASS secretpasswordhere\r\n" do
       include_context 'parse text', description
       its(:command) { should eq 'PASS' }
       it_should_behave_like 'prefix for', nil

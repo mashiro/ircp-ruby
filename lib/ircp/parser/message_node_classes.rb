@@ -53,7 +53,9 @@ module Ircp
 
     class ParamsNode < Treetop::Runtime::SyntaxNode
       def eval(env)
-        env[:options] = env[:params] = [middle_values, trailing_value].flatten.compact
+        params = [middle_values, trailing_value].flatten.compact
+        params.last.gsub!(/\r\n$/, '') unless params.empty?
+        env[:options] = env[:params] = params
         env
       end
 
