@@ -2,6 +2,13 @@ require 'spec_helper'
 
 describe Ircp::Message do
   describe '#initialize' do
+    context 'args' do
+      include_context 'initialize message', 'PASS', 'secretpasswordhere'
+      its(:command) { should eq 'PASS' }
+      it_should_behave_like 'prefix for', nil
+      it_should_behave_like 'params for', 'secretpasswordhere'
+    end
+
     context 'with args' do
       include_context 'initialize message', 'secretpasswordhere', :command => 'PASS'
       its(:command) { should eq 'PASS' }

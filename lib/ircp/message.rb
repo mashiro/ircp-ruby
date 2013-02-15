@@ -10,7 +10,7 @@ module Ircp
       options = args.last.is_a?(Hash) ? args.pop : {}
       @raw = options[:raw]
       @prefix = options[:prefix] ? Prefix.new(options[:prefix]) : nil
-      @command = options[:command]
+      @command = options[:command] || args.shift
       @params = args + Array(options[:params])
       yield self if block_given?
     end
@@ -35,7 +35,7 @@ module Ircp
       end
       tokens += @params
 
-      msg = tokens.map { |token| token.to_s } .reject { |token| token.empty? }.join(' ')
+      msg = tokens.map { |token| token.to_s }.reject { |token| token.empty? }.join(' ')
       msg << CRLF unless msg.end_with?(CRLF)
       msg
     end
