@@ -8,6 +8,7 @@ module Ircp
       @nick = options[:nick]
       @user = options[:user]
       @host = options[:host]
+      yield self if block_given?
     end
 
     def empty?

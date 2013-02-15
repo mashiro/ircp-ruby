@@ -12,6 +12,7 @@ module Ircp
       @prefix = options[:prefix] ? Prefix.new(options[:prefix]) : nil
       @command = options[:command]
       @params = args + Array(options[:params])
+      yield self if block_given?
     end
 
     def inspect
