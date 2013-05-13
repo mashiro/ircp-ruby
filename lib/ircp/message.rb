@@ -28,12 +28,13 @@ module Ircp
       tokens << ":#{@prefix}" if @prefix
       tokens << command
 
-      unless @params.empty?
-        last = @params.pop.to_s
+      new_params = @params.dup
+      unless new_params.empty?
+        last = new_params.pop.to_s
         last.insert 0, ':' if !last.start_with?(':') && last.include?(' ')
-        @params << last
+        new_params << last
       end
-      tokens += @params
+      tokens += new_params
 
       msg = tokens.map { |token| token.to_s }.reject { |token| token.empty? }.join(' ')
       msg << CRLF unless msg.end_with?(CRLF)
