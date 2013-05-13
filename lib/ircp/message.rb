@@ -30,7 +30,7 @@ module Ircp
 
       new_params = @params.dup
       unless new_params.empty?
-        last = new_params.pop.to_s
+        last = new_params.pop.to_s.dup
         last.insert 0, ':' if !last.start_with?(':') && last.include?(' ')
         new_params << last
       end
