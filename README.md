@@ -1,4 +1,4 @@
-# Ircp
+# Ircp [![Build Status](https://travis-ci.org/mashiro/ircp-ruby.png?branch=master)](https://travis-ci.org/mashiro/ircp-ruby) [![Dependency Status](https://gemnasium.com/mashiro/ircp-ruby.png)](https://gemnasium.com/mashiro/ircp-ruby)
 
 Ircp is a IRC minimal parser for ruby.
 
