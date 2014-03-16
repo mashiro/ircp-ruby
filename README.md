@@ -22,7 +22,6 @@ Or install it yourself as:
 # Parse
 require 'ircp'
 msg = Ircp.parse ':Angel!wings@irc.org PRIVMSG Wiz :Are you receiving this message ?'
-
 p msg.prefix.nick # => 'Angel'
 p msg.prefix.user # => 'wings'
 p msg.prefix.host # => 'irc.org'
@@ -31,7 +30,7 @@ p msg.params[0]   # => 'Wiz'
 p msg.params[1]   # => 'Are you receiving this message ?'
 
 # Dump
-msg = Ircp::Message.new 'Wiz', ':Are you receiving this message ?', :command => 'PRIVMSG', :prefix => {:nick => 'Angel', :user => 'wings', :host => 'irc.org'}
+msg = Ircp::Message.new 'PRIVMSG', 'Wiz', ':Are you receiving this message ?', prefix: {nick: 'Angel', user: 'wings', host: 'irc.org'}
 p msg.to_s        # => ':Angel!wings@irc.org PRIVMSG Wiz :Are you receiving this message ?\r\n'
 ```
 

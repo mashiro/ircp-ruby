@@ -29,6 +29,13 @@ describe Ircp::Message do
       it_should_behave_like 'prefix for', nil
       it_should_behave_like 'params for', 'foo', 'hello'
     end
+
+    context 'simple syntax' do
+      include_context 'initialize message', 'PRIVMSG', 'foo', 'bar'
+      its(:command) { should eq 'PRIVMSG' }
+      it_should_behave_like 'prefix for', nil
+      it_should_behave_like 'params for', 'foo', 'bar'
+    end
   end
 
   describe '#to_s' do
